@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/nwolber/go-angles.svg?branch=master)](https://travis-ci.org/nwolber/go-angles)
+
 go-angles is a Go toolchain for the [Angles project](https://github.com/sscdotopen/angles). It is specifically tailored for retrieving the URIs tweeted.
 
 #Install
