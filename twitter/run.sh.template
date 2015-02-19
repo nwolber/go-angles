@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "go build"
+go build
+echo "./twitter $@"
+TWITTER_CONSUMER_KEY="" TWITTER_CONSUMER_SECRET="" TWITTER_APPLICATION_KEY="" TWITTER_APPLICATION_SECRET="" ./twitter "$@"

@@ -1,0 +1,4 @@
+*.sh
+*.json
+.DS_Store
+rethinkdb_data
