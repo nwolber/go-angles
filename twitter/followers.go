@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"time"
 
 	twitter "github.com/ChimeraCoder/anaconda"
 	r "github.com/dancannon/gorethink"
@@ -49,7 +50,9 @@ func newFollowerTask(session *r.Session, api *twitter.TwitterApi) *task {
 			cursor, err := api.GetFollowersIds(params)
 
 			if err != nil {
-				log.Fatalln(err)
+				log.Println(err)
+				time.Sleep(time.Minute)
+				continue
 			}
 
 			log.Println("Fetched", len(cursor.Ids), "followers of", exp.id)
