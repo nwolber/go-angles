@@ -22,7 +22,8 @@ type timelineExplorer struct {
 func newTimelineTask(session *r.Session, api *twitter.TwitterApi) *task {
 	query := r.
 		Table("explorers").
-		OrderBy(r.OrderByOpts{Index: "fetchTime"})
+		OrderBy(r.OrderByOpts{Index: "fetchTime"}).
+		HasFields("screen_name")
 
 	extractor := func(row map[string]interface{}) interface{} {
 		var exp timelineExplorer
