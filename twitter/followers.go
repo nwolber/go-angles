@@ -52,7 +52,7 @@ func newFollowerTask(session *r.Session, api *twitter.TwitterApi) *task {
 			if err != nil {
 				log.Println(err)
 				switch err := err.(type) {
-				case twitter.ApiError:
+				case *twitter.ApiError:
 					if err.StatusCode >= http.StatusBadRequest {
 						log.Println("Abort processing of current user.")
 						return
@@ -102,7 +102,7 @@ func (exp *followerExplorer) markFollower(session *r.Session) {
 	result, err := r.
 		Table("explorers").
 		Insert(map[string]interface{}{
-		"explorer":         exp.id,
+		"id":               exp.id,
 		"followersCrawled": true,
 	}, r.InsertOpts{Conflict: "update"}).
 		RunWrite(session)
