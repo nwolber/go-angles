@@ -6,6 +6,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -51,8 +52,17 @@ func newFollowerTask(session *r.Session, api *twitter.TwitterApi) *task {
 
 			if err != nil {
 				log.Println(err)
-				time.Sleep(time.Minute)
-				continue
+				switch err := err.(type) {
+				case twitter.ApiError:
+					if err.StatusCode >= http.StatusBadRequest {
+						log.Println("Abort processing of current user.")
+						return
+					}
+				default:
+					log.Println("Sleeping a minute and then try again.")
+					time.Sleep(time.Minute)
+					continue
+				}
 			}
 
 			log.Println("Fetched", len(cursor.Ids), "followers of", exp.id)
