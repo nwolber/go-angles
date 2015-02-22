@@ -21,23 +21,22 @@ type followerExplorer struct {
 
 func newFollowerTask(session *r.Session, api *twitter.TwitterApi) *task {
 	selectUncrawledExplorers := func(row r.Term) interface{} {
-		return row.HasFields("followers").Not()
+		return row.HasFields("followersCrawled").Not()
 	}
 	query := r.
-		Table("pi").
-		Filter(selectUncrawledExplorers).
-		OrderBy(r.Desc("tweets"))
+		Table("explorers").
+		Filter(selectUncrawledExplorers)
 
 	extractor := func(row map[string]interface{}) interface{} {
 		var exp followerExplorer
-		exp.id = int64(row["explorer"].(float64))
+		exp.id = int64(row["id"].(float64))
 		return exp
 	}
 
 	processor := func(entity interface{}) {
 		exp := entity.(followerExplorer)
+		defer exp.markFollower(session)
 
-		var followers []int64
 		var nextCursor int64
 		log.Println("Fetching followers of", exp.id)
 		for {
@@ -66,12 +65,10 @@ func newFollowerTask(session *r.Session, api *twitter.TwitterApi) *task {
 			}
 
 			log.Println("Fetched", len(cursor.Ids), "followers of", exp.id)
-			followers = append(followers, cursor.Ids...)
+			exp.storeFollowers(session, cursor.Ids)
 
 			nextCursor = cursor.Next_cursor
-
 			if nextCursor == 0 {
-				exp.storeFollowers(session, followers)
 				return
 			}
 		}
@@ -80,11 +77,33 @@ func newFollowerTask(session *r.Session, api *twitter.TwitterApi) *task {
 }
 
 func (exp *followerExplorer) storeFollowers(session *r.Session, followers []int64) {
+	rows := make([]map[string]interface{}, len(followers))
+	for i, follower := range followers {
+		rows[i] = map[string]interface{}{
+			"explorer": exp.id,
+			"follower": follower,
+		}
+	}
 	result, err := r.
-		Table("pi").
+		Table("followers").
+		Insert(rows).
+		RunWrite(session)
+
+	if err != nil {
+		log.Println(err)
+	}
+
+	if result.Errors > 0 {
+		log.Println(result.FirstError)
+	}
+}
+
+func (exp *followerExplorer) markFollower(session *r.Session) {
+	result, err := r.
+		Table("explorers").
 		Insert(map[string]interface{}{
-		"explorer":  exp.id,
-		"followers": followers,
+		"explorer":         exp.id,
+		"followersCrawled": true,
 	}, r.InsertOpts{Conflict: "update"}).
 		RunWrite(session)
 

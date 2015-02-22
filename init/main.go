@@ -64,6 +64,12 @@ func main() {
 		log.Fatalln(err)
 	}
 
+	// create a table to hold followers
+	log.Println("Creating table 'followers'.")
+	if _, err := r.Db("angles").TableCreate("followers").Run(session); err != nil {
+		log.Fatalln(err)
+	}
+
 	if fromMySQL {
 		log.Println("Importing explorers from MySQL data.")
 		// construct a sequence of JSON objects, which look like this:
