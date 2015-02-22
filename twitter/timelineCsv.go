@@ -13,11 +13,17 @@ func newTimelineCsvTask() *task {
 	selectValidUris := func(row r.Term) interface{} {
 		return row.Field("realUri").Eq("INVALID").Not()
 	}
+	selectExplorersWithName := func(row r.Term) interface{} {
+		return row.HasFields("screen_name")
+	}
 	query := r.
 		Db("angles").
 		Table("tweetedUris").
 		Filter(selectValidUris).
-		WithFields("explorer", "realUri")
+		EqJoin("explorer", r.Table("explorers")).
+		Zip().
+		Filter(selectExplorersWithName).
+		WithFields("explorer", "screen_name", "realUri")
 
 	extractor := func(row map[string]interface{}) interface{} {
 		return row
@@ -33,7 +39,7 @@ func newTimelineCsvTask() *task {
 
 	processor := func(entity interface{}) {
 		row := entity.(map[string]interface{})
-		csv.Write([]string{fmt.Sprintf("%d", int64(row["explorer"].(float64))), row["realUri"].(string)})
+		csv.Write([]string{fmt.Sprintf("%d", int64(row["explorer"].(float64))), row["screen_name"].(string), row["realUri"].(string)})
 	}
 
 	return newTask(query, extractor, processor, true)
