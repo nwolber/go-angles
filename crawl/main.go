@@ -58,12 +58,7 @@ func main() {
 				// always signal that the worker exited
 				defer func() { done <- struct{}{} }()
 
-				for {
-					uri, ok := <-uris
-					if !ok {
-						return
-					}
-
+				for uri := range uris {
 					log.Println("Fetching", uri)
 					resp, err := http.Head(uri)
 

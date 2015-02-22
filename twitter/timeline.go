@@ -37,13 +37,7 @@ func newTimelineTask(session *r.Session, api *twitter.TwitterApi) *task {
 	processor := func(entity interface{}) {
 		exp := entity.(timelineExplorer)
 		tweets := exp.getTimeline(api, session)
-		for {
-			tweet, ok := <-tweets
-
-			if !ok {
-				break
-			}
-
+		for tweet := range tweets {
 			for _, uri := range tweet.Entities.Urls {
 				storeURI(session, exp.id, tweet.Id, uri.Expanded_url)
 			}

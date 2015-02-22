@@ -83,18 +83,14 @@ func newTask(query r.Term, extractor func(row map[string]interface{}) interface{
 func (t *task) run(session *r.Session) {
 	go t.entityLoop(session)
 
-	for {
-		if entity, ok := <-t.results; ok {
-			if t.async {
-				go t.processor(entity)
-			} else {
-				t.processor(entity)
-			}
+	for entity := range t.results {
+		if t.async {
+			go t.processor(entity)
 		} else {
-			log.Println("No more entities.")
-			return
+			t.processor(entity)
 		}
 	}
+	log.Println("No more entities.")
 }
 
 // entityLoop fetches all entities returned by the tasks query, passes them to the extractor
