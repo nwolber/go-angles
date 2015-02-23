@@ -39,6 +39,7 @@ func newTimelineCsvTask() *task {
 	}
 
 	csv := csv.NewWriter(file)
+	csv.Comma = ';'
 
 	processor := func(entity interface{}) {
 		row := entity.(map[string]interface{})
