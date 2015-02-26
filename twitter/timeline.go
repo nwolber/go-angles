@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"time"
 
 	twitter "github.com/ChimeraCoder/anaconda"
 	r "github.com/dancannon/gorethink"
@@ -30,7 +31,13 @@ func newTimelineTask(session *r.Session, api *twitter.TwitterApi) *task {
 		exp.id = int64(row["id"].(float64))
 		exp.screenName = row["screen_name"].(string)
 		exp.maxID = int64(row["maxID"].(float64))
-		exp.fetchTime = int64(row["fetchTime"].(float64))
+
+		switch fetchTime := row["fetchTime"].(type) {
+		case float64:
+			exp.fetchTime = int64(fetchTime)
+		case time.Time:
+			exp.fetchTime = fetchTime.UnixNano()
+		}
 		return exp
 	}
 
