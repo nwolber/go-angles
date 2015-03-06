@@ -46,5 +46,5 @@ func newTimelineCsvTask() *task {
 		csv.Write([]string{fmt.Sprintf("%d", int64(row["explorer"].(float64))), row["screen_name"].(string), row["realUri"].(string)})
 	}
 
-	return newTask(query, extractor, processor, true)
+	return newTask(query, extractor, processor, false)
 }
